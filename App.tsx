@@ -13,6 +13,7 @@ import { getThemeColors } from './src/utils';
 function App() {
   useEffect(() => {
     initializeStores();
+    
   }, []);
 
   return (
