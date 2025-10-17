@@ -1,0 +1,81 @@
+name: Adopt Codex PR Description
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  adopt:
+    # Chỉ chạy nếu comment thuộc về một PR (không phải Issue thường)
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR description from Codex comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const issue_number = context.payload.issue.number;
+            const comment = context.payload.comment;
+
+            // === 0) Nhận diện comment từ bot Codex ===
+            // Thay/giữ danh sách login dưới đây đúng với bot của bạn
+            const CODEX_LOGINS = new Set([
+              "chatgpt-codex-connector",
+              "codex-bot"
+            ]);
+            if (!CODEX_LOGINS.has(comment.user.login)) {
+              core.info(`Comment by ${comment.user.login}, not Codex. Skip.`);
+              return;
+            }
+
+            // === 1) Lấy PR hiện tại ===
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: issue_number
+            });
+            const existing = pr.body || "";
+            const ALLOW_MARKER = "<!-- AI:ALLOW_EDIT -->";
+
+            // Không ghi đè nếu đã có mô tả thủ công và không có marker
+            if (existing && !existing.includes(ALLOW_MARKER)) {
+              core.info("PR has manual description without marker. Skip.");
+              return;
+            }
+
+            // === 2) Trích phần tóm tắt từ comment của Codex ===
+            const body = comment.body || "";
+            const START = "<!-- CODEX_SUMMARY_START -->";
+            const END = "<!-- CODEX_SUMMARY_END -->";
+            let summary = "";
+
+            if (body.includes(START) && body.includes(END)) {
+              summary = body.split(START)[1].split(END)[0].trim();
+            } else {
+              // Fallback: tìm các section phổ biến hoặc dùng toàn bộ
+              const mdMatch = body.match(/(?:(?:##|###)\s*Summary[\s\S]*)/i);
+              summary = (mdMatch ? mdMatch[0] : body).trim();
+            }
+
+            if (!summary) {
+              core.info("No summary text found. Skip.");
+              return;
+            }
+
+            // === 3) Lắp vào PR body (giữ marker để cho phép cập nhật lần sau) ===
+            const newBody = `${ALLOW_MARKER}${summary}`.trim();
+            
+            // Tránh update khi không thay đổi gì
+            if (existing.trim() === newBody.trim()) {
+              core.info("Body unchanged. Skip update.");
+              return;
+            }
+
+            await github.rest.pulls.update({
+              owner, repo, pull_number: issue_number, body: newBody
+            });
+
+            core.info("PR description updated from Codex.");
