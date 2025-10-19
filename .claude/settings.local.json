@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn add react-native-dotenv)",
+      "Bash(yarn add -D @types/react-native-dotenv)",
+      "Bash(npm install react-native-dotenv)",
+      "Bash(npm install -D @types/react-native-dotenv)",
+      "Bash(npm install react-native-dotenv @types/react-native-dotenv --legacy-peer-deps)",
+      "Bash(mkdir -p src/config src/services src/types/movie src/components/common src/components/movie src/screens/Home src/screens/Details src/screens/Wishlist)",
+      "Bash(npm install --save-dev husky lint-staged @commitlint/cli @commitlint/config-conventional)",
+      "Bash(npm install --save-dev husky lint-staged @commitlint/cli @commitlint/config-conventional --legacy-peer-deps)",
+      "Bash(npx husky init)",
+      "Bash(mkdir -p .husky)",
+      "Bash(chmod +x .husky/pre-commit .husky/commit-msg)",
+      "Bash(npm install --save-dev babel-plugin-module-resolver --legacy-peer-deps)",
+      "Bash(npm install react-native-bootsplash --legacy-peer-deps)",
+      "Bash(mkdir -p assets)",
+      "Bash(npx react-native generate-bootsplash --help)",
+      "Bash(pod install)",
+      "Bash(bundle exec pod install)",
+      "Bash(npm install --save-dev @storybook/react-native @storybook/addon-ondevice-controls @storybook/addon-ondevice-actions @react-native-async-storage/async-storage react-native-safe-area-context --legacy-peer-deps)",
+      "Bash(npm install --save-dev storybook @storybook/core-server @storybook/core-common --legacy-peer-deps)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

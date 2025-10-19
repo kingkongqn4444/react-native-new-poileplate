@@ -1,0 +1,56 @@
+name: Auto Codex PR Description
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto ping Codex to generate PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+
+            const existing = pr.body || "";
+            const ALLOW_MARKER = "<!-- AI:ALLOW_EDIT -->";
+
+            // 2) Chỉ ping Codex nếu body trống hoặc có marker cho phép
+            if (existing && !existing.includes(ALLOW_MARKER)) {
+              core.info("PR already has manual description. Skip Codex.");
+              return;
+            }
+
+            // 3) Kiểm tra xem đã từng ping Codex chưa
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const alreadyPinged = comments.some(c =>
+              /@codex\s+(summarize-pr|review|describe|summary)/i.test(c.body || "")
+            );
+            if (alreadyPinged) {
+              core.info("Codex already pinged for this PR. Skip.");
+              return;
+            }
+
+            // 4) Gửi comment ping Codex bot (đổi lệnh nếu bot bạn dùng khác)
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: "@codex summarize-pr",
+            });
+
+            core.info("✅ Pinged Codex to generate PR description.");
