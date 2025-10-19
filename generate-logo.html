@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Logo</title>
+</head>
+<body>
+  <canvas id="canvas" width="512" height="512"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Background (transparent)
+    ctx.clearRect(0, 0, 512, 512);
+
+    // Draw circle background
+    ctx.fillStyle = '#E50914';
+    ctx.beginPath();
+    ctx.arc(256, 256, 230, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw film reel
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(156, 156, 200, 200);
+
+    ctx.fillStyle = '#E50914';
+    ctx.fillRect(166, 166, 180, 180);
+
+    // Draw film holes
+    ctx.fillStyle = '#FFFFFF';
+    const holePositions = [176, 226, 276, 326];
+    holePositions.forEach(y => {
+      ctx.beginPath();
+      ctx.arc(176, y, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(336, y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Draw play button
+    ctx.beginPath();
+    ctx.moveTo(230, 220);
+    ctx.lineTo(230, 292);
+    ctx.lineTo(290, 256);
+    ctx.closePath();
+    ctx.fill();
+
+    // Download the image
+    setTimeout(() => {
+      const link = document.createElement('a');
+      link.download = 'logo.png';
+      link.href = canvas.toDataURL();
+      link.click();
+      document.body.innerHTML = '<h1>Logo generated! Check your downloads folder.</h1>';
+    }, 100);
+  </script>
+</body>
+</html>
